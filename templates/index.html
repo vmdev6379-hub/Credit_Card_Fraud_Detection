@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fraud Screening Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar__brand">
+    <span class="topbar__mark">&#9673;</span>
+    <span class="topbar__name">LEDGERWATCH</span>
+  </div>
+  <div class="topbar__tag">credit card transaction screening &mdash; logistic regression</div>
+</header>
+
+<section class="tape" aria-label="live transaction feed">
+  <div class="tape__track" id="tapeTrack"><!-- populated by JS --></div>
+</section>
+
+<main>
+
+  <section class="hero">
+    <div class="hero__intro">
+      <p class="eyebrow">01 &mdash; screen a transaction</p>
+      <h1>Every transaction<br>tells on itself.</h1>
+      <p class="hero__lede">
+        Enter a transaction's amount and elapsed time, load a sample from the
+        dataset, or fine-tune the underlying PCA signal. The model returns a
+        fraud probability in real time.
+      </p>
+      {% if is_synthetic %}
+      <p class="notice">Running on a synthetic demo dataset (no <code>creditcard.csv</code> found) &mdash; same schema as the real Kaggle set, generated so the console works out of the box.</p>
+      {% endif %}
+    </div>
+
+    <form class="scan-card" id="scanForm">
+      <div class="scan-card__row">
+        <label for="sampleSelect">Load a sample</label>
+        <select id="sampleSelect">
+          <option value="">&mdash; choose &mdash;</option>
+        </select>
+      </div>
+
+      <div class="scan-card__grid">
+        <div class="field">
+          <label for="amount">Amount ($)</label>
+          <input type="number" id="amount" step="0.01" value="60.00" required>
+        </div>
+        <div class="field">
+          <label for="time">Time (seconds elapsed)</label>
+          <input type="number" id="time" step="1" value="43200" required>
+        </div>
+      </div>
+
+      <details class="advanced">
+        <summary>Advanced &mdash; PCA components (V1&ndash;V28)</summary>
+        <div class="scan-card__vgrid" id="vGrid"><!-- 28 inputs injected by JS --></div>
+      </details>
+
+      <button type="submit" class="scan-card__submit">Screen transaction</button>
+    </form>
+
+    <div class="verdict" id="verdict" data-state="idle">
+      <p class="verdict__label">Verdict</p>
+      <p class="verdict__result" id="verdictResult">Awaiting input</p>
+      <div class="verdict__gauge">
+        <div class="verdict__gauge-fill" id="gaugeFill"></div>
+      </div>
+      <p class="verdict__prob" id="verdictProb">&mdash;</p>
+    </div>
+  </section>
+
+  <section class="dashboard">
+    <p class="eyebrow">02 &mdash; model at a glance</p>
+    <div class="dashboard__grid">
+      <div class="metric-card">
+        <span class="metric-card__value">{{ (metrics.accuracy * 100) | round(1) }}%</span>
+        <span class="metric-card__label">Accuracy</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-card__value">{{ (metrics.precision * 100) | round(1) }}%</span>
+        <span class="metric-card__label">Precision</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-card__value">{{ (metrics.recall * 100) | round(1) }}%</span>
+        <span class="metric-card__label">Recall</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-card__value">{{ (metrics.f1 * 100) | round(1) }}%</span>
+        <span class="metric-card__label">F1-score</span>
+      </div>
+    </div>
+
+    <div class="distribution">
+      <p class="distribution__caption">Class balance in the full dataset</p>
+      <div class="distribution__bar">
+        <div class="distribution__normal" id="distNormal"></div>
+        <div class="distribution__fraud" id="distFraud"></div>
+      </div>
+      <div class="distribution__legend">
+        <span><i class="dot dot--normal"></i>Normal &mdash; <span id="distNormalCount"></span></span>
+        <span><i class="dot dot--fraud"></i>Fraud &mdash; <span id="distFraudCount"></span></span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <span>Logistic Regression &middot; scikit-learn</span>
+  <span>Built from the Credit Card Fraud Detection project</span>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
