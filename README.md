@@ -1,114 +1,306 @@
-Fraud Screening Console
-A lightweight Flask web application that wraps a Logistic Regression model for real-time Credit Card Fraud Detection. It features an interactive browser UI to test transactions manually or load pre-configured samples to see fraud probability scoring instantly.
+# 💳 Fraud Screening Console
 
-🚀 Quick Start (Local Run)
-1. Clone & Install Dependencies
-Navigate to the project root and install the required Python packages:
+A lightweight Flask-based web application that uses a **Logistic Regression** model to detect fraudulent credit card transactions in real time.
 
-Bash
-cd webapp
-pip install -r requirements.txt
-2. Launch the Application
-Run the Flask development server:
+Users can manually enter transaction details or load sample transactions through an intuitive web interface. The application instantly predicts whether a transaction is **Fraudulent** or **Legitimate** and displays the corresponding fraud probability.
 
-Bash
-python app.py
-Open http://127.0.0.1:5000 in your web browser.
+---
 
-📊 Data Dependency Note: At startup, the app looks for creditcard.csv in the root directory. If the file is missing, the backend will automatically generate a synthetic dataset matching the Kaggle schema so the app runs fully out-of-the-box. To use genuine production data, download the official dataset from Kaggle Credit Card Fraud Detection and place creditcard.csv directly inside the webapp/ folder.
+# ✨ Features
 
-📂 Project Structure
-Plaintext
+* Real-time fraud prediction
+* Logistic Regression machine learning model
+* Clean and responsive web interface
+* REST API for predictions
+* Automatic model training at application startup
+* Automatic synthetic dataset generation if the original dataset is unavailable
+* Works with the Kaggle Credit Card Fraud Detection dataset
+
+---
+
+# 📂 Project Structure
+
+```text
 webapp/
-├── app.py              # Flask backend (Trains model at startup & exposes API endpoints)
-├── requirements.txt    # Python package dependencies
+│
+├── app.py                 # Flask backend and ML model
+├── requirements.txt       # Python dependencies
+│
 ├── templates/
-│   └── index.html      # Frontend HTML template
-└── static/
-    ├── css/style.css   # Main console styling
-    └── js/main.js      # Frontend interaction logic & API integration
-🔌 API Documentation
-The backend provides a structured REST API that can be consumed by the frontend console or external scripts:
+│   └── index.html         # Frontend HTML
+│
+├── static/
+│   ├── css/
+│   │   └── style.css      # Application styling
+│   │
+│   └── js/
+│       └── main.js        # Frontend JavaScript
+│
+└── creditcard.csv         # Kaggle dataset (optional)
+```
 
-1. Serve UI Console
-Endpoint: GET /
+---
 
-Description: Serves the main browser interface.
+# 📊 Dataset
 
-2. Get Model Metadata & Samples
-Endpoint: GET /api/meta
+The application is designed to use the **Credit Card Fraud Detection** dataset available on Kaggle.
 
-Response Protocol (application/json):
+**Download the dataset:**
 
-JSON
-{
-  "metrics": {
-    "accuracy": 0.998,
-    "auc_roc": 0.942
-  },
-  "class_balance": {
-    "normal": 284315,
-    "fraud": 492
-  },
-  "samples": [
-    { "Time": 0, "Amount": 149.62, "V1": -1.359, "...": "..." }
-  ]
-}
-3. Predict Transaction Fraud
-Endpoint: POST /api/predict
+https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
 
-Headers: Content-Type: application/json
+Place the downloaded **`creditcard.csv`** file inside the `webapp` directory.
 
-Payload Request (application/json):
+If the dataset is not found, the application automatically creates a synthetic dataset with the same feature schema, allowing the project to run without additional setup. For accurate predictions and evaluation, it is recommended to use the original Kaggle dataset.
 
-JSON
+---
+
+# 🚀 Installation
+
+## 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/fraud-screening-console.git
+
+cd fraud-screening-console/webapp
+```
+
+---
+
+## 2. Create a virtual environment (Recommended)
+
+### Windows
+
+```bash
+python -m venv venv
+
+venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+python3 -m venv venv
+
+source venv/bin/activate
+```
+
+---
+
+## 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Run the application
+
+```bash
+python app.py
+```
+
+---
+
+## 5. Open the application
+
+Visit the following URL in your browser:
+
+```text
+http://127.0.0.1:5000
+```
+
+---
+
+# 🔌 API Endpoints
+
+## Home Page
+
+```http
+GET /
+```
+
+Returns the main web interface.
+
+---
+
+## Model Information
+
+```http
+GET /api/meta
+```
+
+Returns model information, including:
+
+* Model accuracy
+* Class distribution
+* Sample transactions
+* Dataset statistics
+
+---
+
+## Fraud Prediction
+
+```http
+POST /api/predict
+```
+
+### Request Body
+
+```json
 {
   "features": {
-    "Time": 406.0,
-    "Amount": 1.84,
-    "V1": -1.359807,
-    "V2": -0.072781,
-    "V28": -0.021053
+    "Time": 1000,
+    "Amount": 52.30,
+    "V1": 0.23,
+    "V2": -0.41,
+    "...": "..."
   }
 }
-(Note: Must include all 30 features: Time, Amount, and PCA transformations V1 through V28)
+```
 
-Response Protocol (application/json):
+### Response
 
-JSON
+```json
 {
   "label": "fraud",
-  "fraud_probability": 0.873
+  "fraud_probability": 0.87
 }
-🌐 Production Deployment
-Flask's built-in development server (python app.py) is not scaled or hardened for production environments. Follow one of these methods to deploy securely online:
+```
 
-Method A: WSGI Production Server (Recommended)
-Install a production-grade WSGI server like gunicorn (Linux/macOS) or waitress (Windows) to handle concurrent traffic securely:
+---
 
-Bash
-pip install gunicorn
-gunicorn -w 2 -b 0.0.0.0:8000 app:app
-Method B: Platform-as-a-Service (Render, Railway, Fly.io)
-Add gunicorn to your requirements.txt.
+# 🧠 Machine Learning Model
 
-Connect your Git repository to the platform provider.
+The application uses a **Logistic Regression** classifier trained on the Credit Card Fraud Detection dataset.
 
-Configure the platform's execution Start Command to:
+### Workflow
 
-Bash
+1. Load the dataset.
+2. Preprocess transaction features.
+3. Train the Logistic Regression model.
+4. Evaluate model performance.
+5. Serve predictions through the Flask API.
+
+---
+
+# 🌐 Deployment
+
+This application is a standard Flask project and can be deployed on any Python hosting platform.
+
+## Render
+
+* Connect your GitHub repository.
+* Render automatically detects the Flask application.
+* Add **Gunicorn** to `requirements.txt`.
+* Set the start command:
+
+```bash
 gunicorn app:app
-Method C: Cloud Providers (PythonAnywhere)
-Upload your project directory using the web interface or Git, navigate to the Web Apps configuration dashboard, and point the entry runner target to app.py.
+```
 
-Method D: Docker Containerization
-Expose port 5000, inject your environment requirements, and run via Gunicorn:
+---
 
-Dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
-COPY . .
-EXPOSE 5000
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+## Railway
+
+* Connect the GitHub repository.
+* Railway automatically installs dependencies.
+* Start command:
+
+```bash
+gunicorn app:app
+```
+
+---
+
+## Fly.io
+
+Deploy using a Dockerfile or the Fly CLI.
+
+---
+
+## PythonAnywhere
+
+* Upload the project files.
+* Create a new Flask web application.
+* Point the application to `app.py`.
+
+---
+
+## Docker
+
+Create a Docker image using the project directory and `requirements.txt`, then expose the required port.
+
+---
+
+# 🚀 Production Server
+
+Do **not** use Flask's built-in development server in production.
+
+Instead, install **Gunicorn** (Linux/macOS) or **Waitress** (Windows).
+
+### Gunicorn
+
+```bash
+pip install gunicorn
+
+gunicorn -w 2 -b 0.0.0.0:8000 app:app
+```
+
+### Waitress (Windows)
+
+```bash
+pip install waitress
+
+waitress-serve --host=0.0.0.0 --port=8000 app:app
+```
+
+---
+
+# 📦 Requirements
+
+* Python 3.9+
+* Flask
+* NumPy
+* Pandas
+* Scikit-learn
+* Gunicorn (Production)
+* Waitress (Windows Production)
+
+Install all dependencies using:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# 📸 Application Overview
+
+The application provides:
+
+* A modern web interface
+* Manual transaction entry
+* Sample transaction loading
+* Real-time fraud prediction
+* Fraud probability visualization
+* REST API support
+
+---
+
+# 📄 License
+
+This project is intended for educational and research purposes.
+
+The Credit Card Fraud Detection dataset belongs to its original creators and is available through Kaggle.
+
+---
+
+# 👨‍💻 Author
+
+Developed as a Machine Learning and Flask web application demonstrating real-time credit card fraud detection using Logistic Regression.
+
+---
+
+## ⭐ If you found this project useful, consider giving it a star on GitHub!
